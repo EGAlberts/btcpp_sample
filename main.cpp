@@ -63,14 +63,17 @@ class ThinkWhatToSay : public BT::SyncActionNode
 int main()
 {
 
-  BehaviorTreeFactory factory;
+  // BehaviorTreeFactory factory;
 
-  factory.registerNodeType<SaySomething>("SaySomething");
-  factory.registerNodeType<ThinkWhatToSay>("ThinkWhatToSay");
+  // factory.registerNodeType<SaySomething>("SaySomething");
+  // factory.registerNodeType<ThinkWhatToSay>("ThinkWhatToSay");
 
-  auto tree = factory.createTreeFromText(xml_text);
+  // auto tree = factory.createTreeFromText(xml_text);
 
-  tree.tickWhileRunning();
+  // tree.tickWhileRunning();
+
+  std::cout << convertFromString<NodeStatus>("IDLE") << std::endl;
+  std::cout << convertFromString<NodeType>("ACTION") << std::endl;
 
   return 0;
 }
