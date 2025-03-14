@@ -8,72 +8,61 @@ static const char* xml_text = R"(
  <root BTCPP_format="4" >
 
      <BehaviorTree ID="MainTree">
-        <Sequence name="root">
-            <AlwaysSuccess/>
-            <SaySomething   message="this works too" />
-            <ThinkWhatToSay text="{the_answer}"/>
-            <SaySomething   message="{the_answer}" />
-        </Sequence>
+            <ReceiveNodeEnums input_node_status="IDLE" input_node_type="Control" />
      </BehaviorTree>
 
  </root>
  )";
 // clang-format on
 
-class SaySomething : public BT::SyncActionNode
+class ReceiveNodeEnums : public BT::SyncActionNode
 {
   public:
-  SaySomething(const std::string& name, const BT::NodeConfig& config) :
+  ReceiveNodeEnums(const std::string& name, const BT::NodeConfig& config) :
         BT::SyncActionNode(name, config)
-  {}
+  {
+    // NodeType another_node_type;
+    // getInput("input_node_type", another_node_type); Uncomment to trigger Seg fault.
+  }
 
   BT::NodeStatus tick() override
   {
-    std::string msg;
-    getInput("message", msg);
-    std::cout << msg << std::endl;
+    NodeStatus node_status;
+    NodeType node_type;
+    
+    getInput("input_node_status", node_status);
+    getInput("input_node_type", node_type);
+
+    std::cout << "Inside tick() with getInput:" << std::endl;
+    std::cout << node_status << std::endl;
+    std::cout << node_type << std::endl << std::endl;
+
     return BT::NodeStatus::SUCCESS;
   }
 
   static BT::PortsList providedPorts()
   {
-    return {BT::InputPort<std::string>("message")};
+    return {
+      BT::InputPort<NodeStatus>("input_node_status"),
+      BT::InputPort<NodeType>("input_node_type"),
+    };
   }
 };
 
-class ThinkWhatToSay : public BT::SyncActionNode
-{
-  public:
-  ThinkWhatToSay(const std::string& name, const BT::NodeConfig& config) :
-        BT::SyncActionNode(name, config)
-  {}
-
-  BT::NodeStatus tick() override
-  {
-    setOutput("text", "The answer is 42");
-    return BT::NodeStatus::SUCCESS;
-  }
-
-  static BT::PortsList providedPorts()
-  {
-    return {BT::OutputPort<std::string>("text")};
-  }
-};
 
 int main()
 {
 
-  // BehaviorTreeFactory factory;
+  BehaviorTreeFactory factory;
 
-  // factory.registerNodeType<SaySomething>("SaySomething");
-  // factory.registerNodeType<ThinkWhatToSay>("ThinkWhatToSay");
+  factory.registerNodeType<ReceiveNodeEnums>("ReceiveNodeEnums");
 
-  // auto tree = factory.createTreeFromText(xml_text);
+  auto tree = factory.createTreeFromText(xml_text);
 
-  // tree.tickWhileRunning();
-
+  tree.tickWhileRunning();
+  std::cout << "Without getInput: " << std::endl;
   std::cout << convertFromString<NodeStatus>("IDLE") << std::endl;
-  std::cout << convertFromString<NodeType>("ACTION") << std::endl;
+  std::cout << convertFromString<NodeType>("Control") << std::endl << std::endl;
 
   return 0;
 }
